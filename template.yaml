@@ -1,3 +1,87 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: aws-apigw-lambda-demo
+
+Parameters:
+  ExecutionRole:
+    Type: String
+
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+    MethodSettings: [{
+                       "ThrottlingRateLimit": 3,
+                       "ThrottlingBurstLimit": 5,
+                       "MetricsEnabled": True,
+                       "DataTraceEnabled": True,
+                       # On all Paths & methods
+                       "ResourcePath": "/*",
+                       "HttpMethod": "*",
+                       "LoggingLevel": "INFO"
+                     }]
+
+Resources:
+  MySkillsDemoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Test
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          version: "demo-0.1"
+          title: "MySkillsDemo"
+        schemes:
+          - "https"
+        consumes:
+          - "application/vnd.api+json"
+        produces:
+          - "application/vnd.api+json"
+        paths:
+          /rate:
+            get:
+              parameters:
+                - in: "query"
+                  name: "amount"
+                  required: true
+                  type: "string"
+                  pattern: "^[0-9]{1,45}$"
+              responses: {}
+              x-amazon-apigateway-request-validator: "Validate query string parameters and\
+                                                          \ headers"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MySkillsDemoLambda.Arn}:live/invocations"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
+        x-amazon-apigateway-request-validators:
+          Validate query string parameters and headers:
+            validateRequestParameters: true
+            validateRequestBody: false
+
+
+  MySkillsDemoLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: "MySkillsDemoLambda"
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      Role: !Ref ExecutionRole
+      Tracing: Active
+      AutoPublishAlias: live
+      Events:
+        GetRate:
+          Type: Api
+          Properties:
+            Path: /rate
+            Method: get
+            RestApiId:
+              Ref: MySkillsDemoApi
+
