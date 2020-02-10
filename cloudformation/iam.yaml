@@ -1,0 +1,85 @@
+# CloudFormation template to create the required IAM Roles
+# 1) CloudFormation execution role
+# 2) Lambda execution role
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  CloudFromationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CloudFormationRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+
+  Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: CloudFormationRolePolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - cloudformation:*
+              - s3:*
+              - apigateway:*
+              - lambda:*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - kms:*
+            Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/my-skills-demo-key
+          - Effect: Allow
+            Action:
+              - iam:PassRole
+            Resource: !Sub arn:aws:iam::{AWS::AccountId}:role/LambdaRole
+      Roles:
+        - !Ref CloudFromationRole
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+
+  LambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: LambdaPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameters
+            Resource:
+              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rate-map
+          - Effect: Allow
+            Action:
+              - ssm:DescribeParameter
+              - xray:PutTraceSegments
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - logs:*
+            Resource: "arn:aws:logs:*:*:*"
+      Roles:
+        - !Ref LambdaRole

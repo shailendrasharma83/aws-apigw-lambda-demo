@@ -1,0 +1,82 @@
+# CloudFormation template to create the pre-requisite resources required to deploy the stack
+# 1) S3 bucket for holding deploying artifacts
+# 2) KMS key for encrypting the bucket/artifact
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Used by Assumed Cloudformation Role to Encrypt Artifacts
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: my-skills-demo-key
+        Statement:
+          - Sid: Allows admin of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: "*"
+          - Sid: Allow use of the key for Cloudformation Role
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+
+  KMSAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/my-skills-demo-key
+      TargetKeyId: !Ref KMSKey
+
+  DeploymentS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-skills-demo-deployment-bucket
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+
+  DeploymentS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DeploymentS3Bucket
+      PolicyDocument:
+        Version: 2008-10-17
+        Statement:
+          - Sid: AllowAccess
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Join ["", ["arn:aws:s3:::", !Ref DeploymentS3Bucket, "/*"]]
+              - !Join ["", ["arn:aws:s3:::", !Ref DeploymentS3Bucket, ""]]
+    DependsOn:
+    - DeploymentS3Bucket
