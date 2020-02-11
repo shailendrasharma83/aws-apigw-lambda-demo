@@ -33,15 +33,9 @@ Resources:
               - s3:*
               - apigateway:*
               - lambda:*
-            Resource: "*"
-          - Effect: Allow
-            Action:
-              - kms:*
-            Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/my-skills-demo-key
-          - Effect: Allow
-            Action:
               - iam:PassRole
-            Resource: !Sub arn:aws:iam::{AWS::AccountId}:role/LambdaRole
+              - kms:*
+            Resource: "*"
       Roles:
         - !Ref CloudFromationRole
 
@@ -69,11 +63,7 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
-              - ssm:GetParameters
-            Resource:
-              - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rate-map
-          - Effect: Allow
-            Action:
+              - ssm:GetParameter
               - ssm:DescribeParameter
               - xray:PutTraceSegments
             Resource: "*"
