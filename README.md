@@ -1,27 +1,26 @@
 # aws-apigw-lambda-demo
 ########################
 
-   Create aws profile "sandbox"
-
-   Load aws profile "sandbox"
-   export AWS_PROFILE=sandbox
+    Create aws profile "sandbox"
+    Load aws profile "sandbox"
+    export AWS_PROFILE=sandbox
 
    
    # Validate templates
    
-   cd cloudformation
+    cd cloudformation
    
-   aws --profile sandbox cloudformation validate-template --template-body file://iam.yaml
+    aws --profile sandbox cloudformation validate-template --template-body file://iam.yaml
    
-   aws --profile sandbox cloudformation validate-template --template-body file://pre-requisite.yaml
+    aws --profile sandbox cloudformation validate-template --template-body file://pre-requisite.yaml
    
    # npm install
-   npm install --prod
+    npm install --prod
    
    # Create IAM Roles
-   aws --profile sandbox cloudformation create-stack --stack-name MySkillsDemoIAMRoles --template-body file://iam.yaml --capabilities CAPABILITY_NAMED_IAM
+    aws --profile sandbox cloudformation create-stack --stack-name MySkillsDemoIAMRoles --template-body file://iam.yaml --capabilities CAPABILITY_NAMED_IAM
    # Create S3 bucket and KMS key
-   aws --profile sandbox cloudformation create-stack --stack-name MySkillsDemoPrerequisites --template-body file://pre-requisite.yaml --capabilities CAPABILITY_NAMED_IAM
+    aws --profile sandbox cloudformation create-stack --stack-name MySkillsDemoPrerequisites --template-body file://pre-requisite.yaml --capabilities CAPABILITY_NAMED_IAM
    
    **Note** :: As these commands are being executed in the context of an IAM user, the IAM user need to he added in the principal for S3 bucket policy and allow usage block in KMS
   
@@ -56,36 +55,8 @@
   
   # Create SSM Param "rate-map" as
   
-  
-  { "rates" : [
-        {
-            "min": 1,
-            "max": 1000,
-            "rate": 1
-        },
-        {
-            "min": 1001,
-            "max": 5000,
-            "rate": 1.5
-        },
-        {
-            "min": 5001,
-            "max": 10000,
-            "rate": 2
-        },
-        {
-            "min": 10001,
-            "max": 50000,
-            "rate": 2.5
-        },
-        {
-            "min": 50001,
-            "max": null,
-            "rate": 3
-        }]
-    }
-    
-  
+    aws ssm put-parameter --name rate-map --value file://config/ssm.json --type String --overwrite
+ 
 
   # Run CloudFormation commands for deployment
     
