@@ -7,7 +7,7 @@ exports.handler = async function (event) {
         amount = event.queryStringParameters.amount
 
         if(amount<=0) {
-            throw new BadRequestError("INVALID_AMOUNT")
+            throw new BadRequestException("INVALID_AMOUNT")
         }
 
         const SSM_PARAMS = await SSM.getParameter({
@@ -24,7 +24,7 @@ exports.handler = async function (event) {
     }
     catch (err) {
         return {
-            statusCode:  err instanceof BadRequestError ? 400 : 500,
+            statusCode:  err instanceof BadRequestException ? 400 : 500,
             body: JSON.stringify({ message: err.message }),
         };
     }
@@ -34,9 +34,8 @@ function getApplicableRate(rates, amount) {
     return rates.reduce((prev, current) => current.min <= amount ? current : prev).rate
 }
 
-class BadRequestError extends Error {
+class BadRequestException extends Error {
     constructor(args){
         super(args);
-        this.name = "BadRequest"
     }
 }
