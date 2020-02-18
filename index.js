@@ -6,6 +6,10 @@ exports.handler = async function (event) {
     try {
         amount = event.queryStringParameters.amount
 
+        if(amount<=0) {
+            throw new BadRequestError("INVALID_AMOUNT")
+        }
+
         const SSM_PARAMS = await SSM.getParameter({
             Name: "rate-map",
             WithDecryption: true
@@ -17,15 +21,22 @@ exports.handler = async function (event) {
             statusCode: 200,
             body: JSON.stringify({"rate" : getApplicableRate(map.rates, amount)}),
         };
-    } catch (err) {
-        console.log('Error Occurred ::' + err)
+    }
+    catch (err) {
         return {
-            statusCode: 500,
-            body: JSON.stringify({ detail: err }),
+            statusCode:  err instanceof BadRequestError ? 400 : 500,
+            body: JSON.stringify({ message: err.message }),
         };
     }
 }
 
 function getApplicableRate(rates, amount) {
     return rates.reduce((prev, current) => current.min <= amount ? current : prev).rate
+}
+
+class BadRequestError extends Error {
+    constructor(args){
+        super(args);
+        this.name = "BadRequest"
+    }
 }

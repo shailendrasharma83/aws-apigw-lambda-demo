@@ -57,6 +57,11 @@
   
     aws ssm put-parameter --name rate-map --value file://config/ssm.json --type String --overwrite
  
+ 
+  # Running Tests
+  
+     npm run test
+ 
 
   # Run CloudFormation commands for deployment
     
