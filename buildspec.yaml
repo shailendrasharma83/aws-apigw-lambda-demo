@@ -5,12 +5,13 @@ phases:
     runtime-versions: 
       nodejs: 10 
     commands:
-    - npm install --only=prod
-    - npm run test
+    - npm install
   build:
-    commands:
+    commands:    
+      - npm run test 
+      - rm -rf node_modules
+      - npm install --only=prod
       - aws cloudformation package --debug --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yaml
-      - ls -ltr
 artifacts:
   type: zip
   files:
