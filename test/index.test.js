@@ -82,11 +82,11 @@ describe('Rate function', () => {
         })
 
 
-        it('Should throw bad request when ssm call fails', async () => {
-            AWSMock.restore(); // Undoing mock to throw actual exception
-            const response = await handler(createMockRequest(100));
-            assert.equal(response.statusCode, 500)
-        })
+//         it('Should throw bad request when ssm call fails', async () => {
+//             AWSMock.restore(); // Undoing mock to throw actual exception
+//             const response = await handler(createMockRequest(100));
+//             assert.equal(response.statusCode, 500)
+//         })
     });
 });
 
