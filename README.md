@@ -80,3 +80,5 @@
      3) Add a custom auth lambda and write logic to authenticate
      4) Use Developer authenticated identities
      5) APIs can be further guarded by allowing traffic from certain IP CIDRs i.e. IPs of WAF 
+     
+     
