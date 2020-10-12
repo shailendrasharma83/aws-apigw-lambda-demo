@@ -2,6 +2,7 @@ const AWS = require('aws-sdk')
 const SSM = new AWS.SSM()
 
 exports.handler = async function (event) {
+    
     let map, amount;
     try {
         amount = event.queryStringParameters.amount
