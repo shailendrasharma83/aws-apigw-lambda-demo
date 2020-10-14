@@ -2,6 +2,7 @@ const AWS = require('aws-sdk')
 const SSM = new AWS.SSM()
 
 exports.handler = async function (event) {
+    console.log("Hello From :: Version 1")
     
     let map, amount;
     try {
