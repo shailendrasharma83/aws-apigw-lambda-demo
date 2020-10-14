@@ -126,7 +126,7 @@ Resources:
         - Name: FunctionName
           Value: !Ref MySkillsDemoLambda
         - Name: ExecutedVersion
-          Value: !GetAtt MySkillsDemoLambda.Version
+          Value: !GetAtt MySkillsDemoLambda.Version.Version
       EvaluationPeriods: 2
       MetricName: Errors
       Namespace: AWS/Lambda
