@@ -76,6 +76,19 @@ Resources:
       Role: !Ref ExecutionRole
       Tracing: Active
       AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Canary10Percent5Minutes
+        Alarms:
+          # A list of alarms that you want to monitor
+          - !Ref AliasErrorMetricGreaterThanZeroAlarm
+          - !Ref LatestVersionErrorMetricGreaterThanZeroAlarm
+        Hooks:
+          # Validation Lambda functions that are run before & after traffic shifting
+          PreTraffic: !Ref PreTrafficLambdaFunction
+#          PostTraffic: !Ref PostTrafficLambdaFunction
+        # Provide a custom role for CodeDeploy traffic shifting here, if you don't supply one
+        # SAM will create one for you with default permissions
+#        Role: !Ref IAMRoleForCodeDeploy # Parameter example, you can pass an IAM ARN
       Events:
         GetRate:
           Type: Api
@@ -84,4 +97,67 @@ Resources:
             Method: get
             RestApiId:
               Ref: MySkillsDemoApi
+
+  AliasErrorMetricGreaterThanZeroAlarm:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmDescription: Lambda Function Error > 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Resource
+          Value: !Sub "${MySkillsDemoLambda}:live"
+        - Name: FunctionName
+          Value: !Ref MySkillsDemoLambda
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+
+  LatestVersionErrorMetricGreaterThanZeroAlarm:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmDescription: Lambda Function Error > 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Resource
+          Value: !Sub "${MySkillsDemoLambda}:live"
+        - Name: FunctionName
+          Value: !Ref MySkillsDemoLambda
+        - Name: ExecutedVersion
+          Value: !GetAtt MySkillsDemoLambda.Version
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+
+  PreTrafficLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: preTrafficHook.handler
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "codedeploy:PutLifecycleEventHookExecutionStatus"
+              Resource:
+                !Sub 'arn:${AWS::Partition}:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${ServerlessDeploymentApplication}/*'
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "lambda:InvokeFunction"
+              Resource: !GetAtt MySkillsDemoLambda.Arn
+      Runtime: nodejs12.x
+      FunctionName: 'CodeDeployHook_preTrafficHook'
+      DeploymentPreference:
+        Enabled: False
+        Role: ""
+      Environment:
+        Variables:
+          CurrentVersion: !Ref MySkillsDemoLambda.Version
 
