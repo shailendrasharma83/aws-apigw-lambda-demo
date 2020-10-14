@@ -2,13 +2,13 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions: 
+    runtime-versions:
       nodejs: 12
     commands:
     - npm install
   build:
-    commands:    
-      - npm run test 
+    commands:
+#      - npm run test
       - rm -rf node_modules
       - npm install --only=prod
       - aws cloudformation package --debug --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yaml
