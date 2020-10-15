@@ -2,8 +2,8 @@ const AWS = require('aws-sdk')
 const SSM = new AWS.SSM()
 
 exports.handler = async function (event) {
-    console.log("Hello From :: Version 10")
-    // console.log("Introducing Error
+    console.log("Hello From :: Version 11")
+    console.log("Introducing Error
 
     let map, amount;
     try {
