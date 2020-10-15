@@ -3,8 +3,8 @@ const SSM = new AWS.SSM()
 
 exports.handler = async function (event) {
     console.log("Hello From :: Version 3")
-    console.log("Introducing Error 
-                
+    // console.log("Introducing Error
+
     let map, amount;
     try {
         amount = event.queryStringParameters.amount
