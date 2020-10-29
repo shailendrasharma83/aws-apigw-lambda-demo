@@ -1,1 +1,2 @@
-console.log("----> " + process.env.rate)
+var test = "test--"+process.env.rate
+console.log("----> --- " + test)
