@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   parameter-store:
-    rate-map: "rate-map"
+    rate: "rate-map"
 
 phases:
   install:
