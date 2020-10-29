@@ -1,2 +1,1 @@
-var test = "test--"+process.env.rate
-console.log("----> --- " + test)
+console.log("----> --- " + (process.env.rate === "shail"))
