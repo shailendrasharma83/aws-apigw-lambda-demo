@@ -3,7 +3,6 @@ const SSM = new AWS.SSM()
 
 exports.handler = async function (event) {
     console.log("Hello From :: Version 11")
-    console.log("Introducing Error
 
     let map, amount;
     try {
