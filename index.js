@@ -2,13 +2,13 @@ const AWS = require('aws-sdk')
 const SSM = new AWS.SSM()
 
 exports.handler = async function (event) {
-    console.log("Hello From :: Version 11")
+    console.log("Hello From :: Version :: " + process.env.AWS_LAMBDA_FUNCTION_VERSION)
 
     let map, amount;
     try {
         amount = event.queryStringParameters.amount
 
-        if(amount<=0) {
+        if (amount <= 0) {
             throw new BadRequestException("INVALID_AMOUNT")
         }
 
@@ -21,13 +21,18 @@ exports.handler = async function (event) {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({"rate" : getApplicableRate(map.rates, amount)}),
+            body: JSON.stringify({
+                "rate": getApplicableRate(map.rates, amount),
+                "version": process.env.AWS_LAMBDA_FUNCTION_VERSION
+            }),
         };
-    }
-    catch (err) {
+    } catch (err) {
         return {
-            statusCode:  err instanceof BadRequestException ? 400 : 500,
-            body: JSON.stringify({ message: err.message }),
+            statusCode: err instanceof BadRequestException ? 400 : 500,
+            body: JSON.stringify({
+                "message": err.message,
+                "version": process.env.AWS_LAMBDA_FUNCTION_VERSION
+            }),
         };
     }
 }
@@ -37,7 +42,7 @@ function getApplicableRate(rates, amount) {
 }
 
 class BadRequestException extends Error {
-    constructor(args){
+    constructor(args) {
         super(args);
     }
 }
