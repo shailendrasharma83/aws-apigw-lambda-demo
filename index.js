@@ -13,7 +13,7 @@ exports.handler = async function (event) {
         }
 
         const SSM_PARAMS = await SSM.getParameter({
-            Name: "rate-map",
+            Name: "rate-map-error",
             WithDecryption: true
         }).promise()
 
