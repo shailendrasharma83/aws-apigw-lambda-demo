@@ -1,5 +1,5 @@
 # aws-apigw-lambda-demo
-#########################
+########################
 
     Create aws profile "sandbox"
     Load aws profile "sandbox"
